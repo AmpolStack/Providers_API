@@ -1,0 +1,21 @@
+# Archivos de compilación
+bin/
+obj/
+.vs/
+.vscode/
+.publish/
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Configuraciones sensibles
+appsettings.Development.json
+appsettings.Production.json
+
+# Archivos de usuario de Visual Studio
+*.user
+*.suo
+
+# Pruebas HTTP locales
+*.http
