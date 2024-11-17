@@ -19,6 +19,7 @@ namespace Providers_API.IOC
 
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IMailService, MailService>();
+            services.AddScoped<IUserService, UserService>();
         }
     }
 }

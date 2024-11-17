@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Providers_API.BLL.Definitions;
@@ -12,38 +13,49 @@ namespace Providers_API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IGenericRepository<User> _userRepository;
+        private readonly IUserService _userService;
         private readonly IMailService _mailService;
         private readonly IMapper _mapper;
-        public record _credentials(int id, string password);
+        public record credentials(string email, string password);
 
-        public record _vmUser(string name, string address, string password, string userType, string description, string email);
-
-        public UserController(IGenericRepository<User> repo, IMailService mailService, IMapper mapper)
+        public UserController(IUserService userService, IMailService mailService, IMapper mapper)
         {
-            _userRepository = repo;
+            _userService = userService;
             _mailService = mailService;
             _mapper = mapper;
         }
 
 
         [HttpGet("getUserList")]
-        public async Task<IActionResult> GetAllUsers([FromQuery] string user)
+        public async Task<List<VMUser>> GetAllUsers()
         {
-            IQueryable userList = await _userRepository.GetAll();
-            return Ok(new { userDeploy = user, data = userList });
+            List<User> userList = await _userService.getUsersList();
+            return _mapper.Map<List<VMUser>>(userList);
         }
 
         
         [HttpPost("GetUserByCredentials")]
-        public async Task<IActionResult> getUserByPassword([FromBody] _credentials credentials)
+        public async Task<IActionResult> getUserByPassword([FromBody] credentials credentials)
         {
-            User resultUser = await _userRepository.Select((x) => (x.UserId == credentials.id) && (x.Password == credentials.password));
-            if (resultUser == null)
+            var response = await _userService.getUserByCredentials(credentials.email, credentials.password);
+            if(response == null)
             {
-                return BadRequest("El usuario o contraseña son incorrectos");
+                return NotFound("el usuario o contraseña son erroneos");
             }
-            return Ok(resultUser);
+
+            return Ok(_mapper.Map<VMUser>(response));
+        }
+
+        [HttpPost("GetUserByCredentials")]
+        public async Task<IActionResult> getUserById([FromQuery] int id)
+        {
+            var response = await _userService.getUserById(id);
+            if (response == null)
+            {
+                return NotFound("No existe usuario vinculado a este id");
+            }
+
+            return Ok(_mapper.Map<VMUser>(response));
         }
 
         // Create users, the input variables are an record objects like mapper
@@ -51,13 +63,13 @@ namespace Providers_API.Controllers
         public async Task<IActionResult> createNewUser([FromBody] RegisterVMUser user)
         {
 
-            User convertUser = _mapper.Map<User>(user);
-            var outputUser = await _userRepository.Create(convertUser);
+            User mapperUser = _mapper.Map<User>(user);
+            var outputUser = await _userService.createNewUser(mapperUser);
             if(outputUser == null)
             {
-                return BadRequest("No se pudo crear el usuario");
+                return BadRequest("No se pudo crear el usuario, ya existe una cuenta vinculada a este correo");
             }
-            return Ok(outputUser);
+            return Ok(_mapper.Map<VMUser>(outputUser));
         }
 
 
