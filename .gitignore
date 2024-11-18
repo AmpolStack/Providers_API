@@ -12,6 +12,8 @@ obj/
 # Configuraciones sensibles
 appsettings.Development.json
 appsettings.Production.json
+\Providers_API\appsettings.Development.json
+\Providers_API\appsettings.Production.json
 
 # Archivos de usuario de Visual Studio
 *.user
@@ -19,3 +21,5 @@ appsettings.Production.json
 
 # Pruebas HTTP locales
 *.http
+
+

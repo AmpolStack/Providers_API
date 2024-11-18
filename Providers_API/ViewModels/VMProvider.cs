@@ -1,4 +1,6 @@
-﻿namespace Providers_API.ViewModels
+﻿using Providers_API.Models;
+
+namespace Providers_API.ViewModels
 {
     public class VMProvider
     {
@@ -11,5 +13,11 @@
         public string EntityName { get; set; } = null!;
 
         public string? AssociationPrefix { get; set; }
+
+        public List<VMContact>? Contacts { get; set; }
+
+        public List<VMActive>? Actives { get; set; }
+
+        public List<VMActivity>? Activities { get; set; }
     }
 }

@@ -52,9 +52,9 @@ namespace Providers_API.BLL.Implementations
             return userList.ToList();
         }
 
-        public Task<bool> SaveProfile(User user)
+        public async Task<bool> SaveProfile(User user)
         {
-            return _repository.Update(user);
+            return await _repository.Update(user);
         }
     }
 }

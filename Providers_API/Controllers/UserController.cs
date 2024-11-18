@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using Azure.Core.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Providers_API.BLL.Definitions;
-using Providers_API.DAL.Definitions;
 using Providers_API.Models;
 using Providers_API.ViewModels;
 
@@ -15,14 +12,18 @@ namespace Providers_API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMailService _mailService;
+        private readonly IProviderService _providerService;
         private readonly IMapper _mapper;
         public record credentials(string email, string password);
+        public record provider_user_Register(RegisterVMUser user, VMProvider provider);
+        public record provider_user_every(VMUser user, VMProvider Provider);
 
-        public UserController(IUserService userService, IMailService mailService, IMapper mapper)
+        public UserController(IUserService userService, IMailService mailService, IMapper mapper, IProviderService providerService)
         {
             _userService = userService;
             _mailService = mailService;
             _mapper = mapper;
+            _providerService = providerService;
         }
 
 
@@ -46,7 +47,7 @@ namespace Providers_API.Controllers
             return Ok(_mapper.Map<VMUser>(response));
         }
 
-        [HttpPost("GetUserByCredentials")]
+        [HttpPost("GetUserById")]
         public async Task<IActionResult> getUserById([FromQuery] int id)
         {
             var response = await _userService.getUserById(id);
@@ -78,6 +79,42 @@ namespace Providers_API.Controllers
         {
             bool response = await _mailService.SendMail("meryblanco000@gmail.com", "test message", "the code is 394202,We waiting you response");
             return Ok(response);
+        }
+
+        [HttpGet("temp/{idUser}")]
+        public async Task<IActionResult> getProviderById([FromRoute] int idUser)
+        {
+            var response = await _providerService.GetProvider(idUser);
+            var mapResponse = _mapper.Map<VMProvider>(response);
+            return Ok(mapResponse);
+        }
+
+        [HttpPost("CreateAUserWithProvider")]
+        public async Task<IActionResult> CreateAUserWithProvider([FromBody] provider_user_Register provider_User_Register )
+        {
+            User mapperUser = _mapper.Map<User>(provider_User_Register.user);
+            var outputUser = await _userService.createNewUser(mapperUser);
+            if (outputUser == null)
+            {
+                return BadRequest("No se pudo crear el usuario, ya existe una cuenta vinculada a este correo");
+            }
+            var responseUser = _mapper.Map<VMUser>(outputUser);
+            var providerMapped = _mapper.Map<Provider>(provider_User_Register.provider);
+            providerMapped.UserId = responseUser.UserId;
+            var coincidense = await _userService.getUserById(providerMapped.UserId);
+            if(coincidense == null)
+            {
+                return NotFound("El usuario no existe");
+            }
+      
+            var response = await _providerService.creteNewProvider(providerMapped);
+
+            if(response == null)
+            {
+                return NotFound("no se pudo crear el usuario proveedor");
+            }
+            var providerReponse = _mapper.Map<VMProvider>(response);
+            return Ok(new { userResponse = responseUser, providerReponse = providerReponse });
         }
 
 

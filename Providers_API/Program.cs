@@ -13,6 +13,15 @@ namespace Providers_API
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddCors(opt =>
+            {
+                opt.AddPolicy("AllowAllPolicity", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                });
+            });
             builder.Services.InjectionDependencies(builder.Configuration);
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -30,7 +39,7 @@ namespace Providers_API
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowAllPolicity");
             app.UseAuthorization();
 
 

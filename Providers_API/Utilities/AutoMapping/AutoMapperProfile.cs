@@ -36,7 +36,15 @@ namespace Providers_API.Utilities.AutoMapping
             #endregion
 
             #region Provider
-            CreateMap<Provider, VMProvider>().ReverseMap();
+            CreateMap<Provider, VMProvider>()
+                .ForMember(dest => dest.Contacts, opt => opt.MapFrom(org => org.Contacts))
+                .ForMember(dest => dest.Actives, opt => opt.MapFrom(org => org.Actives))
+                .ForMember(dest => dest.Activities, opt => opt.MapFrom(org => org.Activities));
+
+            CreateMap<VMProvider, Provider>()
+                .ForMember(dest => dest.Contacts, opt => opt.Ignore())
+                .ForMember(dest => dest.Activities, opt => opt.Ignore())
+                .ForMember(dest => dest.Actives, opt => opt.Ignore());
             #endregion
         }
 

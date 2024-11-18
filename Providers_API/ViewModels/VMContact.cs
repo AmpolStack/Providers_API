@@ -4,7 +4,7 @@
     {
         public int ContactId { get; set; }
 
-        public int ProviderId { get; set; }
+        //public int ProviderId { get; set; }
 
         public string ContactType { get; set; } = null!;
 
