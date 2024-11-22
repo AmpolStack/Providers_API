@@ -14,16 +14,25 @@ namespace Providers_API.Controllers
         private readonly IMailService _mailService;
         private readonly IProviderService _providerService;
         private readonly IMapper _mapper;
+        private readonly IPostService _postService;
+        private readonly IActiveService _activeService;
         public record credentials(string email, string password);
         public record provider_user_Register(RegisterVMUser user, VMProvider provider);
         public record provider_user_every(VMUser user, VMProvider Provider);
 
-        public UserController(IUserService userService, IMailService mailService, IMapper mapper, IProviderService providerService)
+        public UserController(IUserService userService, 
+            IMailService mailService, 
+            IMapper mapper, 
+            IProviderService providerService,
+            IPostService postService,
+            IActiveService activeService)
         {
             _userService = userService;
             _mailService = mailService;
             _mapper = mapper;
             _providerService = providerService;
+            _postService = postService;
+            _activeService = activeService;
         }
 
 
@@ -117,8 +126,62 @@ namespace Providers_API.Controllers
             return Ok(new { userResponse = responseUser, providerReponse = providerReponse });
         }
 
+        [HttpGet("GetAllProvidersWithAllProperties")]
+        public async Task<IActionResult> GetAllProviders()
+        {
+            var response = await _providerService.GetAllProvidersWithAllData();
+            var convertResponse = _mapper.Map <List<VMProvider>>(response);
+            return Ok(convertResponse);
+        }
+        [HttpGet("GetProviderWithAllPropertiesById")]
+        public async Task<IActionResult> GetProviderById([FromQuery] int ProviderId)
+        {
+            var response = await _providerService.GetProviderWithAllDataById(ProviderId);
+            var convertResponse = _mapper.Map<VMProvider>(response);
+            return Ok(convertResponse);
+        }
 
+        [HttpGet("GetAllProvidersToMinimalResponse")]
+        public async Task<IActionResult> GetMinimalProvidersToHome()
+        {
+            var reponse = await _providerService.GetAllProviders();
+            return Ok(_mapper.Map<List<MinimalVMResponse>>(reponse));
+        }
 
+        [HttpGet("GetAllPostsToMinimalResponse")]
+        public async  Task<IActionResult> GetAllPostToHome()
+        {
+            var response = await _postService.getAllPosts();
+            if(response == null)
+            {
+                return NotFound("No se encontró ningún post");
+            }
+            var mapperRespone = _mapper.Map<List<MinimalVMResponse>>(response);
+            return Ok(mapperRespone);
+        }
+
+        [HttpGet("GetAllActivesToMinimalResponse")]
+        public async Task<IActionResult> GetAllActivesToMinimalResponse()
+        {
+            var response = await _activeService.getAllActives();
+            if (response == null)
+            {
+                return NotFound("No se encontró ningún activo");
+            }
+            var mapperRespone = _mapper.Map<List<MinimalVMResponse>>(response);
+            return Ok(mapperRespone);
+        }
+
+        [HttpPost("UpdateProvider")]
+        public async Task<IActionResult> UpdateProvider([FromBody] VMProvider provider)
+        {
+            var response = await _providerService.UpdateProvider(_mapper.Map<Provider>(provider));
+            if(response == false)
+            {
+                return BadRequest("no se pudo realizar la operación");
+            }
+            return Ok(response);
+        }
 
     }
 }

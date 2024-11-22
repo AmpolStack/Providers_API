@@ -21,19 +21,61 @@ namespace Providers_API.BLL.Implementations
 
         }
 
-        public async Task<IQueryable<Provider>> GetAllProviders()
+        public async Task<Provider> GetProvider(int UserId)
         {
-            return await _repository.GetAll();
+            var response = await _repository.GetAll(x => x.UserId == UserId);
+            return response.Include(x => x.User).First();
         }
 
-        public async Task<Provider> GetProvider(int Userid)
+        public async Task<Provider> GetProviderWithProperties(int Userid)
         {
             IQueryable<Provider> response = await _repository.GetAll(x => x.UserId == Userid);
             if(response == null)
             {
                 return null;
             }
-            return response.Include(x => x.Contacts).Include(x => x.Activities).Include(x => x.Actives).ToList().First();
+            return response.Include(x => x.Contacts).Include(x => x.Activities).Include(x => x.Actives).Include(x => x.User).ToList().First();
+        }
+
+        public async Task<Provider> GetProviderWithUserData(int userId)
+        {
+            IQueryable<Provider> response = await _repository.GetAll(x => x.UserId == userId);
+            if (response == null)
+            {
+                return null;
+            }
+            return response.Include(x => x.User).First();
+        }
+
+        public async Task<IQueryable<Provider>> GetAllProvidersWithAllData()
+        {
+            IQueryable<Provider> response = await _repository.GetAll();
+            if (response == null)
+            {
+                return null;
+            }
+            return response.Include(x => x.User).Include(x => x.Posts).Include(x => x.Actives).Include(x => x.Activities).Include(x => x.Contacts);
+        }
+        public async Task<Provider> GetProviderWithAllDataById(int idProvider)
+        {
+            IQueryable<Provider> response = await _repository.GetAll(x => x.ProviderId == idProvider);
+            if (response == null)
+            {
+                return null;
+            }
+            return response.Include(x => x.User).Include(x => x.Posts).Include(x => x.Actives).Include(x => x.Activities).Include(x => x.Contacts).First();
+        }
+
+        public async Task<IQueryable<Provider>> GetAllProviders()
+        {
+            var response = await _repository.GetAll();
+            return response.Include(x => x.User);
+        }
+
+        public async Task<bool> UpdateProvider(Provider provider)
+        {
+            var response = await _repository.Update(provider);
+            return response;
         }
     }
 }

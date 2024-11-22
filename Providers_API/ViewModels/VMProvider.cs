@@ -6,7 +6,7 @@ namespace Providers_API.ViewModels
     {
         public int ProviderId { get; set; }
 
-        public int UserId { get; set; }
+        //public int UserId { get; set; }
 
         public int Nit { get; set; }
 
@@ -19,5 +19,7 @@ namespace Providers_API.ViewModels
         public List<VMActive>? Actives { get; set; }
 
         public List<VMActivity>? Activities { get; set; }
+        public VMUser User { get; set; }
+        public List<VMPost> Posts { get; set; }
     }
 }

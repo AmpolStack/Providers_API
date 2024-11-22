@@ -23,6 +23,8 @@ namespace Providers_API.IOC
             services.AddScoped<IProviderService, ProviderService>();
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IPostService, PostService>();
+            services.AddScoped<IActiveService, ActiveService>();
         }
     }
 }
